@@ -454,17 +454,23 @@ bww_RakOk3a:
          ; disable all irq
          JSRLIB   Disable
          
+         ; use d0 and d1 temporarily to optimize loop
+         move.b   (a5),d0
+         move.b   d0,d1
+         bclr     d3,d0                               ; set REQ=0
+         bset     d3,d1                               ; set REQ=1
+
          ; --- burst loop begin
 bww_BurstLoop:
          ; set even data 0,2,4,...
          move.b   (a3)+,(a4)                          ; write data to port
          ; Toggle REQ
-         bset     d3,(a5)                             ; set REQ=1
+         move.b   d1,(a5)                             ; set REQ=1
          
          ; set odd data 1,3,5,...
          move.b   (a3)+,(a4)                          ; write data to port
          ; Toggle REQ
-         bclr     d3,(a5)                             ; set REQ=1
+         move.b   d0,(a5)                             ; set REQ=0
 
          dbra     d6,bww_BurstLoop
          ; --- burst loop end
@@ -637,15 +643,21 @@ bwr_RakOk3a:
          ; disable all irq
          JSRLIB   Disable
                   
+         ; use d0 and d1 temporarily to optimize loop
+         move.b   (a5),d0
+         move.b   d0,d1
+         bclr     d3,d0                               ; set REQ=0
+         bset     d3,d1                               ; set REQ=1
+
          ; --- burst loop begin
 bwr_BurstLoop:
          ; Toggle REQ
-         bclr     d3,(a5)                             ; set REQ=0
+         move.b   d0,(a5)                             ; set REQ=0
          ; get even data 0,2,4,...
          move.b   (a4),(a3)+                          ; read data from port
          
          ; Toggle REQ
-         bset     d3,(a5)                             ; set REQ=1
+         move.b   d1,(a5)                             ; set REQ=1
          ; get odd data 1,3,5,...
          move.b   (a4),(a3)+                          ; read data from port
 
